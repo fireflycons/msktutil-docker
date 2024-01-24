@@ -10,7 +10,7 @@
 
 This repo contains the things required to build a containerised version of `msktutil` from its source code [here](https://github.com/msktutil/msktutil), allowing it to be run on any machine that can run docker, e.g. Windows.
 
-A common use of this tool is to [create a keytab](https://wiki.squid-cache.org/ConfigExamples/Authenticate/Kerberos#create-keytab) for use by Squid's [Kerberos Negotiate Authentication](https://wiki.squid-cache.org/Features/NegotiateAuthentication) when running [Squid](http://www.squid-cache.org/) on Linux in combination with Windows Active Directory.
+A common use of this tool is to [create a keytab](https://wiki.squid-cache.org/ConfigExamples/Authenticate/Kerberos#create-keytab) for use by Squid's [Kerberos Negotiate Authentication](https://wiki.squid-cache.org/Features/NegotiateAuthentication) when running [Squid](http://www.squid-cache.org/) on Linux in combination with Windows or Samba Active Directory.
 
 ## Building the image
 
@@ -65,11 +65,9 @@ This will drop you at a bash command prompt
     kinit administrator
     ```
 
-1. Now you can run `msktutil` to create your keytabs. The following example creates a keytab for squid based on squid wiki documentation. Adjust for your OU (`-b` argument), domain (`-s`, `-h`, `--upn`, `--server`), primary domain controller (`--server`), and the target machine host name if not `squid`.
+1. Now you can run `msktutil` to create your keytabs. The following example creates a keytab based on the squid wiki documentation. Adjust for your OU (`-b` argument), domain (`-s`, `-h`, `--upn`, `--server`), primary domain controller (`--server`), and the target machine host name if not `squid`.<br/><br/>Note `-k` argument should be set to write the keytab to the bind-mounted directory.
 
-Note `-k` argument should be set to write the keytab to the bind-mounted directory.
-
-    ```
+    ```bash
     msktutil create \
         -b "CN=COMPUTERS" \
         -s HTTP/squid.example.com \
