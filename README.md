@@ -12,11 +12,13 @@ This repo contains the things required to build a containerised version of `mskt
 
 A common use of this tool is to [create a keytab](https://wiki.squid-cache.org/ConfigExamples/Authenticate/Kerberos#create-keytab) for use by Squid's [Kerberos Negotiate Authentication](https://wiki.squid-cache.org/Features/NegotiateAuthentication) when running [Squid](http://www.squid-cache.org/) on Linux in combination with Windows or Samba Active Directory.
 
-## Building the image
+## Inages
 
-```
-docker build -t msktutil .
-```
+Images are published here on [Docker Hub](https://hub.docker.com/r/fireflycons/msktutil)
+
+There are two variants
+1. Image containing only `msktutil`.
+1. Image also containing `kubectl` for use in Kubernetes clusters where you may want to write keytabs to a Kubernetes secret, for instance a CronJob that keeps a machine credential updated.
 
 ## Running the container
 
@@ -25,13 +27,13 @@ When starting the container, bind-mount a directory in the host file system to t
 **Shell**
 
 ```bash
-docker run -it --mount type=bind,source="$(pwd)",target=/keytab msktutil
+docker run -it --mount type=bind,source="$(pwd)",target=/keytab fireflycons/msktutil
 ```
 
 **PowerShell**
 
 ```powershell
-docker run -it --mount type=bind,source="$((Get-Location).Path)",target=/keytab msktutil
+docker run -it --mount type=bind,source="$((Get-Location).Path)",target=/keytab fireflycons/msktutil
 ```
 
 This will drop you at a bash command prompt

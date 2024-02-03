@@ -1,0 +1,53 @@
+ARG DEBIAN_VERSION=bookworm-slim
+ARG MSKTUTIL_VERSION=1.2.1
+ARG KUBECTL_VERSION=v1.29
+
+FROM debian:${DEBIAN_VERSION} as builder
+
+ARG MSKTUTIL_VERSION
+ARG KUBECTL_VERSION
+
+RUN apt update && apt install -y \
+            gcc \
+            g++ \
+            make \
+            libkrb5-dev \
+            libsasl2-dev \
+            libldap2-dev \
+            apt-transport-https \
+            ca-certificates \
+            gpg \
+            curl
+
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+    && curl -fsSL https://pkgs.k8s.io/core:/stable:/${KUBECTL_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${KUBECTL_VERSION}/deb/ /" >> /etc/apt/sources.list.d/kubernetes.list \
+    && apt update \
+    && apt install -y kubectl
+
+WORKDIR /src
+
+RUN curl -kLO https://github.com/msktutil/msktutil/releases/download/${MSKTUTIL_VERSION}/msktutil-${MSKTUTIL_VERSION}.tar.gz \
+    && tar -xf msktutil-${MSKTUTIL_VERSION}.tar.gz \
+    && cd msktutil-${MSKTUTIL_VERSION}/ \
+    && ./configure \
+    && make \
+    && make install
+
+FROM debian:${DEBIAN_VERSION}
+
+RUN apt update -y && DEBIAN_FRONTEND=noninteractive apt install -y \
+            krb5-user \
+            openssl \
+            libldap2-dev \
+            libsasl2-modules-gssapi-mit
+
+COPY --from=builder /usr/local/sbin/msktutil /usr/local/sbin/
+COPY --from=builder /usr/bin/kubectl /usr/bin/
+COPY ./krb5.conf /etc/krb5.conf
+COPY ./update-krb5-conf.sh /usr/local/sbin/update-krb5-conf
+RUN chmod +x /usr/local/sbin/update-krb5-conf
+
+WORKDIR /keytab
+
+
