@@ -16,7 +16,7 @@ RUN apt update -y && apt install -y \
 
 WORKDIR /src
 
-RUN curl -LO https://github.com/msktutil/msktutil/releases/download/${MSKTUTIL_VERSION}/msktutil-${MSKTUTIL_VERSION}.tar.gz \
+RUN curl -kLO https://github.com/msktutil/msktutil/releases/download/${MSKTUTIL_VERSION}/msktutil-${MSKTUTIL_VERSION}.tar.gz \
     && tar -xf msktutil-${MSKTUTIL_VERSION}.tar.gz \
     && cd msktutil-${MSKTUTIL_VERSION}/ \
     && ./configure \
@@ -37,10 +37,9 @@ RUN apt update -y && DEBIAN_FRONTEND=noninteractive apt install -y \
 
 COPY --from=msktutil_builder /usr/local/sbin/msktutil /usr/local/sbin/
 COPY ./krb5.conf /etc/krb5.conf
-COPY ./update-krb5-conf.sh .
-RUN chmod +x update-krb5-conf.sh \
-    && ./update-krb5-conf.sh \
-    && rm -f ./update-krb5-conf.sh \
-    && mkdir /keytab
+COPY ./update-krb5-conf.sh /usr/local/sbin/update-krb5-conf
+RUN chmod +x /usr/local/sbin/update-krb5-conf
+
+WORKDIR /keytab
 
 

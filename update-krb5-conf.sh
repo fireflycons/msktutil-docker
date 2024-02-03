@@ -1,22 +1,35 @@
 #!/bin/sh
 
-if [ -z "$REALM" ]
-then
-    echo "REALM not set"
+usage() {
+    echo "$0 usage:" && grep " .)\ #" $0
+    echo
+    echo "If KDC and ADMIN are the same server, you can give either of -k or -a and the same server will be used for both."
     exit 1
-fi
+}
+[ $# -eq 0 ] && usage
 
-if [ -z "$ADMIN_SERVER" ]
-then
-    echo "ADMIN_SERVER not set"
-    exit 1
-fi
+while getopts 'r:k:a:h' arg
+do
+    case "${arg}" in
+    r) # Specify Realm (Active Directory domain)
+        REALM=$OPTARG
+        ;;
+    k) # Specify KDC server (normally primary domain controller), e.g. dc01
+        KDC_SERVER=$OPTARG
+        ;;
+    a) # Specify Admin server (normally primary domain controller), e.g. dc01
+        ADMIN_SERVER=$OPTARG
+        ;;
+    h | *)
+        usage
+        ;;
+    esac
+done
 
-if [ -z "$KDC_SERVER" ]
-then
-    echo "KDC_SERVER not set"
-    exit 1
-fi
+[ -z "$REALM" ] && usage
+[ -z "$ADMIN_SERVER" -a -z "$KDC_SERVER" ] && usage
+[ -z "$ADMIN_SERVER" ] && ADMIN_SERVER=$KDC_SERVER
+[ -z "$KDC_SERVER" ] && KDC_SERVER=$ADMIN_SERVER
 
 _domain=$(echo $REALM | tr '[:upper:]' '[:lower:]')
 _realm=$(echo $REALM | tr '[:lower:]' '[:upper:]')
