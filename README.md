@@ -14,38 +14,15 @@ A common use of this tool is to [create a keytab](https://wiki.squid-cache.org/C
 
 ## Building the image
 
-You'll need the following information
-
-* `REALM` - The active directory domain to authenticate with (e.g. `example.com`)
-* `ADMIN_SERVER` - Hostname (within domain) of Kerberos Admin server. This is normally the primary domain controller (e.g. `dc01`).
-* `KDC_SERVER` - Hostname (within domain) of Kerberos Key Distribution Centre server. This is also normally the primary domain controller (e.g. `dc01`).
-
-Replace `example.com` and `dc01` with appropriate values for your domain
-
-**Bash**
-
 ```
-docker build -t msktutil \
-     --build-arg REALM=example.com \
-     --build-arg ADMIN_SERVER=dc01 \
-     --build-arg KDC_SERVER=dc01 \
-     .
-```
-
-**PowerShell**
-```
-docker build -t msktutil `
-     --build-arg REALM=example.com `
-     --build-arg ADMIN_SERVER=dc01 `
-     --build-arg KDC_SERVER=dc01 `
-     .
+docker build -t msktutil .
 ```
 
 ## Running the container
 
 When starting the container, bind-mount a directory in the host file system to the container's `/keytab` directory so that the generated keytab can be retrieved easily and copied to the server that needs it.
 
-**Bash**
+**Shell**
 
 ```bash
 docker run -it --mount type=bind,source="$(pwd)",target=/keytab msktutil
@@ -58,6 +35,18 @@ docker run -it --mount type=bind,source="$((Get-Location).Path)",target=/keytab 
 ```
 
 This will drop you at a bash command prompt
+
+1. Configure your domain...
+
+    ```bash
+    update-krb5-conf -r example.com -a dc01 -k dc01
+    ```
+
+    where
+
+    * `-r` - Kerberos Realm (Active Directory domain)
+    * `-a` - Hostname (within domain) of Kerberos Admin server. This is normally the primary domain controller (e.g. `dc01`).
+    * `-k` - Hostname (within domain) of Kerberos Key Distribution Centre server. This is also normally the primary domain controller (e.g. `dc01`).
 
 1. Authenticate with your domain as a user that has rights to create Active Directory objects
 
