@@ -1,4 +1,4 @@
-ARG DEBIAN_VERSION=buster-slim
+ARG DEBIAN_VERSION=bookworm-slim
 ARG MSKTUTIL_VERSION=1.2.1
 
 FROM debian:${DEBIAN_VERSION} as msktutil_builder
@@ -24,10 +24,6 @@ RUN curl -kLO https://github.com/msktutil/msktutil/releases/download/${MSKTUTIL_
     && make install
 
 FROM debian:${DEBIAN_VERSION}
-
-ARG REALM
-ARG ADMIN_SERVER
-ARG KDC_SERVER
 
 RUN apt update -y && DEBIAN_FRONTEND=noninteractive apt install -y \
             krb5-user \
